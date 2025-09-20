@@ -1,4 +1,71 @@
-class Home {
+
+class CommonUtils {
+	static selectWait(selector, func, times, interval) {
+		var _times = times || 100, //100次
+			_interval = interval || 500, //20毫秒每次
+			_jquery = null,
+			_iIntervalID;
+
+		_iIntervalID = setInterval(() => {
+			if (!_times) {
+				clearInterval(_iIntervalID);
+			}
+			_times <= 0 || _times--;
+			_jquery = $(selector);
+			if (_jquery.length) {
+				func && func.call(func);
+				clearInterval(_iIntervalID);
+			}
+		}, _interval);
+		return this;
+	}
+
+	static selectNotWait(selector, func, interval) {
+		let _jquery,
+			_interval = interval || 20,
+			_iIntervalID;
+
+		_iIntervalID = setInterval(() => {
+			_jquery = $(selector);
+			if (_jquery.length < 1) {
+				func && func.call(func);
+				clearInterval(_iIntervalID);
+			}
+		}, _interval);
+	}
+
+	static copyText(value, cb) {
+		const textarea = document.createElement("textarea");
+		textarea.readOnly = "readonly";
+		textarea.style.position = "absolute";
+		textarea.style.left = "-9999px";
+		textarea.value = value;
+		document.body.appendChild(textarea);
+		textarea.select();
+		textarea.setSelectionRange(0, textarea.value.length);
+		document.execCommand("Copy");
+		document.body.removeChild(textarea);
+		if (cb && Object.prototype.toString.call(cb) === "[object Function]") {
+			cb();
+		}
+	}
+
+	/**
+	 * 休眠
+	 * @param {number} ms 休眠多少毫秒
+	 */
+	static sleep(ms) {
+		return new Promise((resolve, reject) => {
+			setTimeout(() => {
+				resolve("完成");
+			}, ms);
+		});
+	}
+}
+
+
+class HomeBanner {
+	static bannerIndex = 0;
 	static start() {
 		this.cache = {
 			items: undefined,
@@ -103,7 +170,6 @@ class Home {
 
 	static injectCall(func, arg) {
 		const script = `
-		// const client = (await window.require(["ApiClient"]))[0];
 		const client = await new Promise((resolve, reject) => {
 			setInterval(() => {
 				if (window.ApiClient != undefined) resolve(window.ApiClient);
@@ -139,11 +205,11 @@ class Home {
 	static async initBanner() {
 		const banner = `
 		<div class="misty-banner">
-			<div class="misty-banner-body">
-			</div>
-			<div class="misty-banner-library">
-				<div class="misty-banner-logos"></div>
-			</div>
+			<div class="misty-banner-body"></div>
+			<div class="misty-banner-library"></div>
+			<!-- 左右切换按钮 -->
+			<div class="misty-banner-nav misty-banner-prev">&#10094;</div>
+			<div class="misty-banner-nav misty-banner-next">&#10095;</div>
 		</div>
 		`;
 		$(".mainAnimatedPages:not(.hide) .homeSectionsContainer").prepend(banner);
@@ -151,29 +217,39 @@ class Home {
 
 		// 插入数据
 		const data = await this.getItems(this.itemQuery);
-		// console.log(data);
+
 		data.Items.forEach(async (item) => {
 			const detail = await this.getItem(item.Id);
 			const img_url = await this.getImageUrl(detail.Id, this.coverOptions);
-			const itemHtml = `
+			var itemHtml = `
 			<div class="misty-banner-item" id="${detail.Id}">
 				<img draggable="false" loading="eager" decoding="async" class="misty-banner-cover" src="${img_url}" alt="Backdrop" style="">
-				<div class="misty-banner-info padded-left padded-right">
-					<h1>${detail.Name}</h1>
-					<div><p>${detail.Overview}</p></div>
+				<div class="misty-banner-info padded-left padded-right">`;
+
+			if (detail.ImageTags && detail.ImageTags.Logo) {
+				var logo_url = img_url.replace('Backdrop?maxWidth=3000&quality=80', 'Logo?maxWidth=3000');
+				itemHtml += `
+				<img id="${detail.Id}" draggable="false" loading="auto" decoding="lazy" class="misty-banner-logo" data-banner="img-title" alt="Logo" onclick="window.Emby.Page.showItem('${detail.Id}')" src="${logo_url}">
+				`;
+			}
+
+			itemHtml += `
+					<div><p onclick="window.Emby.Page.showItem('${detail.Id}')"><strong>${detail.Name}</strong>${detail.Overview}</p></div>
 					<div><button onclick="window.Emby.Page.showItem('${detail.Id}')">MORE</button></div>
 				</div>
 			</div>
 			`;
 
-			if (detail.ImageTags && detail.ImageTags.Logo) {
-				const logo_url = img_url.replace('Backdrop?maxWidth=3000&quality=80', 'Logo?maxWidth=3000')
-				const logoHtml = `
-				<img id="${detail.Id}" draggable="false" loading="auto" decoding="lazy" class="misty-banner-logo" data-banner="img-title" alt="Logo" src="${logo_url}">
-				`;
-				$(".misty-banner-logos").append(logoHtml);
-			}
 			$(".misty-banner-body").append(itemHtml);
+
+			// if (detail.ImageTags && detail.ImageTags.Logo) {
+			// 	const logo_url = img_url.replace('Backdrop?maxWidth=3000&quality=80', 'Logo?maxWidth=3000');
+			// 	const logoHtml = `
+			// 	<img id="${detail.Id}" draggable="false" loading="auto" decoding="lazy" class="misty-banner-logo" data-banner="img-title" alt="Logo" src="${logo_url}">
+			// 	`;
+			// 	$(".misty-banner-logos").append(logoHtml);
+			// }
+
 		});
 
 		// 只判断第一张海报加载完毕, 优化加载速度
@@ -201,21 +277,44 @@ class Home {
 		$(".section0 > div").removeClass("misty-banner-library-overflow"); // 开启overflow 防止无法滚动
 
 		// 滚屏逻辑
-		var index = 0;
-		clearInterval(this.bannerInterval);
-		this.bannerInterval = setInterval(() => {
-			// 背景切换
-			if (window.location.href.endsWith("home.html") && !document.hidden) {
-				index += index + 1 == $(".misty-banner-item").length ? -index : 1;
-				$(".misty-banner-body").css("left", -(index * 100).toString() + "%");
-				// 信息切换
-				$(".misty-banner-item.active").removeClass("active");
-				let id = $(".misty-banner-item").eq(index).addClass("active").attr("id");
-				// LOGO切换
-				$(".misty-banner-logo.active").removeClass("active");
-				$(`.misty-banner-logo[id=${id}]`).addClass("active");
-			}
-		}, 8000);
+		this.bannerIndex = 0;
+
+		const switchBanner = (newIndex) => {
+			const total = $(".misty-banner-item").length;
+			if (newIndex < 0) newIndex = total - 1;
+			if (newIndex >= total) newIndex = 0;
+
+			this.bannerIndex = newIndex;
+
+			$(".misty-banner-body").css("left", -(this.bannerIndex * 100).toString() + "%");
+
+			$(".misty-banner-item.active").removeClass("active");
+			let id = $(".misty-banner-item").eq(this.bannerIndex).addClass("active").attr("id");
+
+			$(".misty-banner-logo.active").removeClass("active");
+			$(`.misty-banner-logo[id=${id}]`).addClass("active");
+
+			// 切换完成后重建计时器
+    		startInterval();
+		};
+
+		// 自动切换计时器
+		const startInterval = () => {
+			clearInterval(this.bannerInterval);
+			this.bannerInterval = setInterval(() => {
+				if (window.location.href.endsWith("home.html") && !document.hidden) {
+					switchBanner(this.bannerIndex + 1);
+				}
+			}, 8000);
+		};
+
+		// 点击左右按钮
+		$(".misty-banner-prev").on("click", () => switchBanner(this.bannerIndex - 1));
+		$(".misty-banner-next").on("click", () => switchBanner(this.bannerIndex + 1));
+
+		// 页面加载完成后启动自动切换
+		startInterval();
+
 	}
 
 	/* 初始事件 */
@@ -237,6 +336,6 @@ class Home {
 // 运行
 if ("BroadcastChannel" in window || "postMessage" in window) {
 	if ($("meta[name=application-name]").attr("content") == "Jellyfin" || $(".accent-emby") != undefined) {
-		Home.start();
+		HomeBanner.start();		
 	}
 }

@@ -47,26 +47,6 @@
     padding-top: 6em!important;
 }
 
-/* .skinHeader-withBackground {
-	right: 0 !important;
-	background-image: linear-gradient(rgba(0,0,0,.5), transparent);
-	background-color: unset;
-} */
-
-/* .misty-banner-library > .emby-scroller-container > .emby-scrollbuttons {
-	padding-top: 18.50em;
-} */
-
-/* .mainAnimatedPages:not(.hide) .skinHeader, .skinHeader-withBackground.headroom-scrolling {
-	width: auto;
-	background-image: linear-gradient(black, transparent) !important;
-	background-color: unset !important;
-} */
-
-/* .mainAnimatedPages[data-type=home]:not(.hide) > div:nth-child(1) .scrollSlider.padded-top-page {
-	padding-top: 0 !important;
-} */
-
 .mainAnimatedPages:not(.hide) .itemsContainer-finepointerwrap {
 	flex-wrap: initial !important;
 	-webkit-flex-wrap: initial !important;
@@ -74,7 +54,6 @@
 
 .mainAnimatedPages:not(.hide) .section0 {
 	z-index: 2;
-	/* top: 50px; */
 }
 
 .mainAnimatedPages:not(.hide) .section0 .cardText {
@@ -155,11 +134,9 @@
 }
 
 .misty-banner-logo {
-	position: absolute;
 	user-select: none;
 	object-fit: contain;
 	height: clamp(0rem, -2.182rem + 10.91vw, 6rem);
-	/* width: fit-content; */
 	max-width: 16vw;
 	transform: translateY(calc(-50% - clamp(-2rem, -3.455rem + 7.27vw, 2rem)));
 	right: calc(3.4% + min(0.72em, max(0.48em, 1.78vw)));
@@ -171,6 +148,7 @@
 .misty-banner-logo.active {
 	transform: translateY(calc(-100% - clamp(-2rem, -3.455rem + 7.27vw, 2rem)));
 	opacity: 1;
+	cursor: pointer;
 }
 
 .misty-loading {
@@ -237,17 +215,12 @@
 .misty-banner-info {
 	width: 100%;
 	margin: min(.72em, max(.48em, 1.78vw));
-	margin-top: 0;
 	position: absolute;
-	top: 10em;
+	top: 15em;
 	z-index: 1;
 	height: 100%;
 	height: -webkit-fill-available;
-	text-shadow: 2px 2px 2px #000000;
-	/* -webkit-text-stroke: 0.5px black; */
-	/* display: flex;
-	flex-direction: column;
-	justify-content: center; */
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 1.0);
 }
 
 .misty-banner-info > * {
@@ -268,45 +241,38 @@
 	transition-delay: .8s;
 }
 
-.misty-banner-info h1 {
-	color: #fff !important;
-	font-size: clamp(1rem, -.362rem + 4.75vw, 3.0rem);
-	font-weight: bolder;
-	margin: 0;
-	text-shadow: 2px 2px 2px #000000;
-	/* text-shadow: 0 4px 10px rgb(0 0 0 / 20%); */
-	/* margin-bottom: clamp(0rem, -.545rem + 2.73vw, 1.5rem); */
-	max-width: 80%;
-	display: -webkit-box !important;
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 1;
-	overflow: hidden;
-}
-
 .misty-banner-info p {
-	color: #fff !important;
+	color: #fcfafec5 !important;
 	font-size: clamp(.6rem, .4rem + 1vw, 1.6rem);
 	font-weight: bold;
 	max-width: 35%;
-	/* opacity: .7; */
 	display: -webkit-box !important;
 	-webkit-box-orient: vertical;
 	-webkit-line-clamp: 3;
 	overflow: hidden;
+	cursor: pointer;
 }
+
+.misty-banner-info p strong {
+	color: #fff !important;
+    text-shadow: 2px 2px 2px #000000;
+    font-size: 1.2em;
+    margin-left: 0.5rem;
+    margin-right: 0.8rem;
+}
+
 
 .misty-banner-info button {
 	cursor: pointer;
-	margin-top: clamp(0rem, -2.625rem + 7.5vw, 3rem);
-	width: 6em;
-	height: 1.8em;
-	background-color: #fff;
+	width: 7em;
+    height: 2.2em;
+	border-radius: 1.5em;
+	color: #fff;
+	background: rgba(0, 0, 0, .5);
 	border: none;
+	margin-top: clamp(0rem, -2.625rem + 7.5vw, 3rem);
 	font-size: clamp(.6rem, -.275rem + 2.5vw, 1.6rem);
-	border-radius: 10px;
-	font-weight: bold;
 	letter-spacing: 2px;
-	box-shadow: 0 2px 7px rgba(1, 1, 1, -.8);
 	font-family: system-ui;
 	transition: .2s;
 }
@@ -343,6 +309,9 @@
 	.misty-banner {
 		margin-top: 0;
     }
+	.misty-banner-nav {
+		display: none !important;
+	}
 }
 
 .misty-banner .backdropCard {
@@ -359,4 +328,213 @@
 
 .misty-banner-library-overflow {
 	overflow: visible !important;
+}
+
+.misty-banner-nav {
+	position: absolute;
+	top: 33%;
+	font-size: 1.5em;
+	color: white;
+	width: 40px;
+	height: 40px;
+	line-height: 40px;
+	text-align: center;
+	color: white;
+	background: rgba(0, 0, 0, 0.3);
+	padding: 0.2em;
+	cursor: pointer;
+	border-radius: 50%;
+	user-select: none;
+	transition: background 0.3s;
+	transform: translateY(-50%);
+	z-index: 5;
+}
+.misty-banner-nav:hover {
+	background: rgba(0, 0, 0, 0.6);
+}
+.misty-banner-prev {
+	left: 1%;
+}
+.misty-banner-next {
+	right: 1%;
+}
+
+
+/*Login Page*/
+
+:root {
+	--netflix-background-img: url(https://assets.nflxext.com/ffe/siteui/vlv3/b2c3e95b-b7b5-4bb7-a883-f4bfc7472fb7/2f7d0a70-8491-477d-bc04-37faf472c746/HK-zh-20240805-POP_SIGNUP_TWO_WEEKS-perspective_WEB_bf991504-0d41-46d8-95c3-4d3924e6637f_large.jpg) !important;
+}
+
+#loginPage {
+	background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent 20%),
+		linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 20%),
+		linear-gradient(to left, rgba(0, 0, 0, 0.75), transparent 20%),
+		linear-gradient(to right, rgba(0, 0, 0, 0.75), transparent 20%),
+		var(--netflix-background-img);
+	background-size: cover !important;
+}
+
+.layout-mobile #loginPage {
+	background: linear-gradient(to left, #000000bf, #000000bf),
+		var(--netflix-background-img);
+	background-size: cover !important;
+}
+
+#loginPage {
+	margin-top: 0 !important;
+	overflow: hidden scroll;
+}
+
+#loginPage h1::after {
+	content: "请登录";
+	font-size: 32px;
+}
+
+#loginPage h1 {
+	font-weight: 700;
+	font-size: 0;
+	margin-bottom: 21.44px;
+	margin-top: 32px !important;
+	text-align: left;
+}
+
+#loginPage .padded-left.padded-right.padded-bottom-page {
+	background: #000000bf;
+	transform: translate(-50%, -50%);
+	top: 50%;
+	left: 50%;
+	margin: 0;
+	position: absolute;
+	border-radius: 10px;
+	width: 30vw;
+	height: 70vh;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	align-content: center;
+	justify-content: center;
+	align-items: center;
+	padding: 3em !important;
+	max-width: 24em;
+}
+
+#loginPage .readOnlyContent {
+	padding: 0 !important;
+	width: 100% !important;
+	height: -webkit-fit-content;
+	height: -moz-fit-content;
+	height: fit-content;
+}
+
+
+#loginPage .inputContainer {
+	background: #333;
+	border-radius: var(--rounding);
+	height: 4em;
+	position: relative;
+}
+
+#loginPage .inputLabel.inputLabelFocused,
+#loginPage .inputLabel:not(.inputLabel-float) {
+	font-size: 0.8em;
+	left: 4%;
+	top: 4%;
+	transform: none;
+}
+
+#divUsers {
+	flex-flow: revert;
+	overflow: scroll visible;
+	justify-content: flex-start;
+}
+
+#loginPage .emby-input {
+	height: 100%;
+	border: none;
+	background: transparent !important;
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	box-shadow: none !important;
+	padding: 4% !important;
+	font-size: 1.1em;
+	border: none !important;
+}
+
+#loginPage .inputLabel {
+	position: absolute;
+	top: 50%;
+	left: 4%;
+	transform: translateY(-50%);
+	font-size: 1.5em;
+	font-weight: 300;
+	transition: 0.2s ease;
+	color: #8c8c8c;
+}
+
+#loginPage .inputContainer:focus,
+#loginPage .inputContainer:focus-within {
+	background: #454545;
+}
+
+.layout-mobile #loginPage .padded-left.padded-right.padded-bottom-page {
+	width: 90vw !important;
+	max-width: 90vw !important;
+	height: 90vh !important;
+	background: transparent;
+}
+
+@media (orientation: landscape) {
+	.layout-mobile #loginPage .padded-left.padded-right.padded-bottom-page {
+		width: 90vh !important;
+		max-width: 90vh !important;
+		height: -webkit-fit-content !important;
+		height: -moz-fit-content !important;
+		height: fit-content !important;
+		transform: translateX(-50%);
+		top: 0;
+	}
+}
+
+.inputContainer {
+	margin-bottom: 1.8em;
+	margin-top: 1.8em;
+}
+
+.manualLoginForm {
+	height: 100%;
+	width: 100%;
+}
+
+.visualLoginForm {
+	width: 100%;
+	position: relative;
+	overflow: hidden;
+}
+
+.noBackdropTransparency .detailPageSecondaryContainer {
+	background: none;
+}
+
+.detailPagePrimaryContainer.padded-left.padded-right.detailRibbon {
+	background: transparent;
+}
+
+.detailPagePrimaryContainer.padded-left.padded-right.detailRibbon>.infoWrapper {
+	border-bottom: 1px solid lightslategray;
+	margin-bottom: -1px;
+	padding-bottom: 1px;
+}
+
+.mainAnimatedPages:not(.hide) .section0 .cardText {
+	display: block;
+	background-color: transparent !important;
+	opacity: 1 !important;
+	position: relative !important;
+}
+
+/*other Page*/
+
+.skinHeader.semiTransparent.noHeaderRight {
+	background: transparent !important;
 }
