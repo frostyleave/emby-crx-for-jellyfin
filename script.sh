@@ -4,6 +4,7 @@
 rm -rf emby-crx
 mkdir -p emby-crx
 wget https://raw.githubusercontent.com/frostyleave/emby-crx/master/static/css/style.css -P emby-crx/
+wget https://raw.githubusercontent.com/frostyleave/emby-crx/master/static/img/icon-transparent.png -P emby-crx/
 wget https://raw.githubusercontent.com/frostyleave/emby-crx/master/static/js/jquery-3.6.0.min.js -P emby-crx/
 wget https://raw.githubusercontent.com/frostyleave/emby-crx/master/static/js/md5.min.js -P emby-crx/
 wget https://raw.githubusercontent.com/frostyleave/emby-crx/master/content/main.js -P emby-crx/

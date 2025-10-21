@@ -88,7 +88,7 @@ class HomeBanner {
 		this.logoOptions = { type: "Logo", maxWidth: 3000 };
 		this.initStart = false;
 		setInterval(() => {
-			if (window.location.href.indexOf("/home.html") != -1) {
+			if (window.location.href.indexOf("/home") != -1) {
 				if ($(".mainAnimatedPages:not(.hide) .misty-banner").length == 0 && $(".misty-loading").length == 0) {
 					this.initStart = false;
 					this.initLoading();
@@ -121,7 +121,7 @@ class HomeBanner {
 	static initLoading() {
 		const load = `
 		<div class="misty-loading">
-			<img loading="auto" decoding="lazy" alt="Logo" src="assets/img/icon-transparent.png" style="max-width:200px;">
+			<img loading="auto" decoding="lazy" alt="Logo" src="emby-crx/icon-transparent.png" style="max-width:200px;">
 			<div class="mdl-spinner">
 				<div class="mdl-spinner__layer mdl-spinner__layer-1">
 					<div class="mdl-spinner__circle-clipper mdl-spinner__left">
@@ -302,7 +302,7 @@ class HomeBanner {
 		const startInterval = () => {
 			clearInterval(this.bannerInterval);
 			this.bannerInterval = setInterval(() => {
-				if (window.location.href.endsWith("home.html") && !document.hidden) {
+				if (window.location.href.indexOf("/home") != -1 && !document.hidden) {
 					switchBanner(this.bannerIndex + 1);
 				}
 			}, 8000);
