@@ -1,4 +1,3 @@
-
 class CommonUtils {
 	static selectWait(selector, func, times, interval) {
 		var _times = times || 100, //100次
@@ -66,7 +65,19 @@ class CommonUtils {
 
 class HomeBanner {
 	static bannerIndex = 0;
-	static start() {
+
+	/** 是否为 v12+ 服务器 */
+	static isV12 = false;
+
+	/**
+	 * 父元素选择器
+	 * 默认(服务器版本 < 12.0): .mainAnimatedPages:not(.hide)
+	 * 服务器版本 >= 12.0:    .skinBody:not(.mainAnimatedPages)
+	 * 由 initContainer() 在 start() 中动态决定
+	 */
+	static container = ".mainAnimatedPages:not(.hide)";
+
+	static async start() {
 		this.cache = {
 			items: undefined,
 			item: new Map(),
@@ -87,29 +98,59 @@ class HomeBanner {
 		this.coverOptions = { type: "Backdrop", maxWidth: 3000 };
 		this.logoOptions = { type: "Logo", maxWidth: 3000 };
 		this.initStart = false;
+
+		// 先根据服务器版本确定父元素选择器, 再开始轮询
+		await this.initContainer();
+
 		setInterval(() => {
 			if (window.location.href.indexOf("/home") != -1) {
-				if ($(".mainAnimatedPages:not(.hide) .misty-banner").length == 0 && $(".misty-loading").length == 0) {
+				if ($(`${this.container} .misty-banner`).length == 0 && $(".misty-loading").length == 0) {
 					this.initStart = false;
 					this.initLoading();
 				}
 				if ($(".hide .misty-banner").length != 0) {
 					$(".hide .misty-banner").remove();
 				}
-				if (!this.initStart && $(".section0 .card").length != 0 && $(".mainAnimatedPages:not(.hide) .misty-banner").length == 0) {
+				if (!this.initStart && $(".section0 .card").length != 0 && $(`${this.container} .misty-banner`).length == 0) {
 					this.initStart = true;
 					this.init();
 				}
-				// $(".headerTabs").hide();
-			} else{
-				// $(".headerTabs").show();
 			}
 		}, 100);
 	}
 
+	/**
+	 * 获取服务器版本并决定父元素选择器
+	 * 版本 >= 12.0 使用 .skinBody:not(.mainAnimatedPages)
+	 */
+	static async initContainer() {
+		let version = "0.0.0";
+		try {
+			const info = await this.getServerVersion();
+			version = (info && (info.Version || info.version)) || "0.0.0";
+		} catch (e) {
+			console.warn("[Misty] 获取服务器版本失败, 使用默认选择器", e);
+		}
+		const major = parseInt(String(version).split(".")[0], 10) || 0;
+
+		this.isV12 = major >= 12;
+		this.container = this.isV12
+			? ".skinBody:not(.mainAnimatedPages)"
+			: ".mainAnimatedPages:not(.hide)";
+		console.log(`[Misty] 服务器版本: ${version}, 父元素选择器: ${this.container}`);
+		return version;
+	}
+
+	/**
+	 * 通过注入方式调用 window.ApiClient.getPublicSystemInfo() 获取服务器信息
+	 */
+	static getServerVersion() {
+		return this.injectCall("getPublicSystemInfo", "");
+	}
+
 	static async init() {
 		// Beta
-		$(".mainAnimatedPages:not(.hide)").attr("data-type", "home");
+		$(`${this.container}`).attr("data-type", "home");
 		// Loading
 		$(".misty-loading img").addClass("active");
 		// Banner
@@ -119,21 +160,7 @@ class HomeBanner {
 
 	/* 插入Loading */
 	static initLoading() {
-		const load = `
-		<div class="misty-loading">
-			<img loading="auto" decoding="lazy" alt="Logo" src="emby-crx/icon-transparent.png" style="max-width:200px;">
-			<div class="mdl-spinner">
-				<div class="mdl-spinner__layer mdl-spinner__layer-1">
-					<div class="mdl-spinner__circle-clipper mdl-spinner__left">
-						<div class="mdl-spinner__circle mdl-spinner__circleLeft"></div>
-					</div>
-					<div class="mdl-spinner__circle-clipper mdl-spinner__right">
-						<div class="mdl-spinner__circle mdl-spinner__circleRight"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-		`;
+		const load = `<div class="misty-loading"><img loading="auto" decoding="lazy" alt="Logo" src="emby-crx/icon-transparent.png" style="max-width:200px;"><div class="mdl-spinner"><div class="mdl-spinner__layer mdl-spinner__layer-1"><div class="mdl-spinner__circle-clipper mdl-spinner__left"><div class="mdl-spinner__circle mdl-spinner__circleLeft"></div></div><div class="mdl-spinner__circle-clipper mdl-spinner__right"><div class="mdl-spinner__circle mdl-spinner__circleRight"></div></div></div></div></div>`;
 		$("body").append(load);
 	}
 
@@ -203,17 +230,14 @@ class HomeBanner {
 
 	/* 插入Banner */
 	static async initBanner() {
-		const banner = `
-		<div class="misty-banner">
-			<div class="misty-banner-body"></div>
-			<div class="misty-banner-library"></div>
-			<!-- 左右切换按钮 -->
-			<div class="misty-banner-nav misty-banner-prev">&#10094;</div>
-			<div class="misty-banner-nav misty-banner-next">&#10095;</div>
-		</div>
-		`;
-		$(".mainAnimatedPages:not(.hide) .homeSectionsContainer").prepend(banner);
-		$(".mainAnimatedPages:not(.hide) .section0").detach().appendTo(".mainAnimatedPages:not(.hide) .misty-banner-library");
+		const bannerV12Class = this.isV12 ? " banner-v12" : "";
+		const banner = `<div class="misty-banner${bannerV12Class}"><div class="misty-banner-body"></div><div class="misty-banner-library"></div><div class="misty-banner-nav misty-banner-prev">&#10094;</div><div class="misty-banner-nav misty-banner-next">&#10095;</div></div>`;
+
+		const $container = $(this.container).first();
+		const $section0 = $container.find(".section0").first();
+
+		// 关键改动: 把 banner 插到 section0 之前, 不移动 section0
+		$section0.before(banner);
 
 		// 插入数据
 		const data = await this.getItems(this.itemQuery);
@@ -223,7 +247,7 @@ class HomeBanner {
 			const img_url = await this.getImageUrl(detail.Id, this.coverOptions);
 			var itemHtml = `
 			<div class="misty-banner-item" id="${detail.Id}">
-				<img draggable="false" loading="eager" decoding="async" class="misty-banner-cover" src="${img_url}" alt="Backdrop" style="">
+				<img draggable="false" loading="eager" decoding="async" class="misty-banner-cover" src="${img_url}" alt="Backdrop" onclick="window.Emby.Page.showItem('${detail.Id}')">
 				<div class="misty-banner-info padded-left padded-right">`;
 
 			if (detail.ImageTags && detail.ImageTags.Logo) {
@@ -234,28 +258,20 @@ class HomeBanner {
 			}
 
 			itemHtml += `
-					<div><p onclick="window.Emby.Page.showItem('${detail.Id}')"><strong>${detail.Name}</strong>${detail.Overview}</p></div>
-					<div><button onclick="window.Emby.Page.showItem('${detail.Id}')">MORE</button></div>
+					<div>
+						<p>▸ <strong>${detail.Name}</strong> ◂ ${detail.Overview}</p>
+					</div>
 				</div>
 			</div>
 			`;
 
 			$(".misty-banner-body").append(itemHtml);
-
-			// if (detail.ImageTags && detail.ImageTags.Logo) {
-			// 	const logo_url = img_url.replace('Backdrop?maxWidth=3000&quality=80', 'Logo?maxWidth=3000');
-			// 	const logoHtml = `
-			// 	<img id="${detail.Id}" draggable="false" loading="auto" decoding="lazy" class="misty-banner-logo" data-banner="img-title" alt="Logo" src="${logo_url}">
-			// 	`;
-			// 	$(".misty-banner-logos").append(logoHtml);
-			// }
-
 		});
 
 		// 只判断第一张海报加载完毕, 优化加载速度
 		await new Promise((resolve, reject) => {
 			let waitLoading = setInterval(() => {
-				let cover = document.querySelector(".misty-banner-cover")
+				let cover = document.querySelector(".misty-banner-cover");
 				if (cover && cover.complete) {
 					clearInterval(waitLoading);
 					resolve();
@@ -265,16 +281,21 @@ class HomeBanner {
 
 		$(".misty-loading").fadeOut(500, () => $(".misty-loading").remove());
 		await CommonUtils.sleep(150);
+
 		// 置入场动画
-		let delay = 80; // 动媒体库画间隔
-		let id = $(".misty-banner-item").eq(0).addClass("active").attr("id"); // 初次信息动画
+		let delay = 80;
+		let id = $(".misty-banner-item").eq(0).addClass("active").attr("id");
 		$(`.misty-banner-logo[id=${id}]`).addClass("active");
 
-		await CommonUtils.sleep(200); // 间隔动画
-		$(".section0 > div").addClass("misty-banner-library-overflow"); // 关闭overflow 防止媒体库动画溢出
-		$(".misty-banner .card").each((i, dom) => setTimeout(() => $(dom).addClass("misty-banner-library-show"), i * delay)); // 媒体库动画
-		await CommonUtils.sleep(delay * 8 + 1000); // 等待媒体库动画完毕
-		$(".section0 > div").removeClass("misty-banner-library-overflow"); // 开启overflow 防止无法滚动
+		await CommonUtils.sleep(200);
+
+		// 关键改动: 卡片现在在 .section0 内, 不在 .misty-banner 内
+		$(".section0 > div").addClass("misty-banner-library-overflow");
+		$section0.find(".card").each((i, dom) =>
+			setTimeout(() => $(dom).addClass("misty-banner-library-show"), i * delay)
+		);
+		await CommonUtils.sleep(delay * 8 + 1000);
+		$(".section0 > div").removeClass("misty-banner-library-overflow");
 
 		// 滚屏逻辑
 		this.bannerIndex = 0;
@@ -294,11 +315,9 @@ class HomeBanner {
 			$(".misty-banner-logo.active").removeClass("active");
 			$(`.misty-banner-logo[id=${id}]`).addClass("active");
 
-			// 切换完成后重建计时器
-    		startInterval();
+			startInterval();
 		};
 
-		// 自动切换计时器
 		const startInterval = () => {
 			clearInterval(this.bannerInterval);
 			this.bannerInterval = setInterval(() => {
@@ -308,25 +327,38 @@ class HomeBanner {
 			}, 8000);
 		};
 
-		// 点击左右按钮
 		$(".misty-banner-prev").on("click", () => switchBanner(this.bannerIndex - 1));
 		$(".misty-banner-next").on("click", () => switchBanner(this.bannerIndex + 1));
 
-		// 页面加载完成后启动自动切换
 		startInterval();
 
 	}
 
 	/* 初始事件 */
 	static initEvent() {
-		// 通过注入方式, 方可调用appRouter函数, 以解决Content-Script window对象不同步问题
 		const script = `
-		// 修复library事件参数
 		const serverId = ApiClient._serverInfo.Id,
-			librarys = document.querySelectorAll(".mainAnimatedPages:not(.hide) .section0 .card");
+			librarys = document.querySelectorAll("${this.container} .section0 .card");
 		librarys.forEach(library => {
 			library.setAttribute("data-serverid", serverId);
 			library.setAttribute("data-type", "CollectionFolder");
+		});
+
+		document.querySelectorAll("emby-scroller").forEach(scroller => {
+			const next = scroller.nextSibling;
+			// 跳过文本节点 (换行/空白) 之类会导致 e.addScrollEventListener is not a function 的节点
+			if (next && next.nodeType !== 1) {
+				// 找下一个真正的元素兄弟
+				let el = next;
+				while (el && el.nodeType !== 1) el = el.nextSibling;
+				if (el && typeof el.addScrollEventListener !== "function") {
+					el.addScrollEventListener = function () {};
+					el.removeScrollEventListener = function () {};
+				}
+			} else if (next && typeof next.addScrollEventListener !== "function") {
+				next.addScrollEventListener = function () {};
+				next.removeScrollEventListener = function () {};
+			}
 		});
 		`;
 		this.injectCode(script);
