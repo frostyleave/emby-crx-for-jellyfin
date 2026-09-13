@@ -231,11 +231,15 @@
 	gap: clamp(.4rem, 1.5vh, 1.25rem);
 
 	text-shadow: 1px 1px 2px rgba(0, 0, 0, 1.0);
-	pointer-events: none;
+	pointer-events: auto;
+
+	color: inherit;
+	text-decoration: none;
+	cursor: pointer;
 }
 
 .misty-banner-info > * {
-	pointer-events: auto;
+	/* pointer-events: auto; */
 	transition: all 2.5s cubic-bezier(0, 1.41, 0.36, 0.93) .4s;
 	transform: translateY(150%);
 	opacity: 0 !important;
@@ -264,6 +268,7 @@
 	overflow: hidden;
 	cursor: pointer;
 	margin: 0;
+	background-image: linear-gradient(90deg, rgba(0, 0, 0, .6), transparent);
 }
 
 .misty-banner-info p strong {

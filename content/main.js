@@ -247,21 +247,22 @@ class HomeBanner {
 			const img_url = await this.getImageUrl(detail.Id, this.coverOptions);
 			var itemHtml = `
 			<div class="misty-banner-item" id="${detail.Id}">
-				<img draggable="false" loading="eager" decoding="async" class="misty-banner-cover" src="${img_url}" alt="Backdrop" onclick="window.Emby.Page.showItem('${detail.Id}')">
-				<div class="misty-banner-info padded-left padded-right">`;
+				<img draggable="false" loading="eager" decoding="async" class="misty-banner-cover" src="${img_url}" alt="Backdrop" >
+				<a href="#/details?id=${detail.Id}&amp;serverId=${detail.ServerId}" class="misty-banner-info padded-left padded-right" data-action="link" aria-label="${detail.Name}" >
+				`;
 
 			if (detail.ImageTags && detail.ImageTags.Logo) {
 				var logo_url = img_url.replace('Backdrop?maxWidth=3000&quality=80', 'Logo?maxWidth=3000');
 				itemHtml += `
-				<img id="${detail.Id}" draggable="false" loading="auto" decoding="lazy" class="misty-banner-logo" data-banner="img-title" alt="Logo" onclick="window.Emby.Page.showItem('${detail.Id}')" src="${logo_url}">
+				<img id="${detail.Id}" draggable="false" loading="auto" decoding="lazy" class="misty-banner-logo" data-banner="img-title" alt="Logo" src="${logo_url}">
 				`;
 			}
 
 			itemHtml += `
 					<div>
-						<p>▸ <strong>${detail.Name}</strong> ◂ ${detail.Overview}</p>
+						<p>▸ <strong>${detail.Name}</strong> ◂ ${detail.Overview.trim()}</p>
 					</div>
-				</div>
+				</a>
 			</div>
 			`;
 
