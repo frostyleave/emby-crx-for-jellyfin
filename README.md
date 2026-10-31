@@ -10,10 +10,11 @@ Jellyfin 美化 插件 (适用于 Chrome 内核浏览器)_
 
 基于原项目适配改动，效果如下
 
-![page1](https://github.com/user-attachments/assets/9b792e8f-fea2-4fe6-8d9c-397650005434)
+![page1](https://github.com/user-attachments/assets/2c464e38-9fa2-4d6b-84dc-d4e7c55d677e)
 
-![page2](https://github.com/user-attachments/assets/ff74bf00-8b5d-43dd-8c42-33032df3463e)
+![page2](https://github.com/user-attachments/assets/c886eea4-4aaa-422b-b1c9-5d66db5c50e6)
 
-![page3](https://github.com/user-attachments/assets/414dce41-6564-46c5-88e2-324d868d05ab)
+![page3](https://github.com/user-attachments/assets/1e2af6b3-9352-4faa-839f-8e2c81bf5364)
 
-![page4](https://github.com/user-attachments/assets/d788ee4f-da09-4cfa-9179-251328e2b111)
+![page4](https://github.com/user-attachments/assets/f18f82b3-4c72-4baa-8e2d-a0f7bc2bd3ab)
+
